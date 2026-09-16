@@ -86,6 +86,21 @@ A page audited only in its initial state is a page audited at its best moment.
 **Credentials never go in the config file.** Use `valueFromEnv` and pass them in
 the environment. The config is committed; the environment is not.
 
+### 3a. Ask for the report format
+
+Ask in the same message as the pages question, so the run is not interrupted
+later. Use the question tool if one is available:
+
+> How should the report be delivered?
+> 1. **HTML report** — one page with severity tables, a run matrix, and the
+>    evidence screenshots inline under each finding. Best for sharing with a
+>    client or a designer.
+> 2. **Text report** — `report.md`, readable in the terminal or a PR. Best when
+>    another agent or a developer consumes it directly.
+
+Remember the answer for step 6. If the user already named a format, do not ask.
+If there is no way to ask (non-interactive run), default to the text report.
+
 ### 4. Run the audit
 
 The runner lives next to this file. Where "next to this file" is depends on how
@@ -166,6 +181,11 @@ your judgement.
 
 ### 6. Write the report
 
+Use the format chosen in step 3a. The content rules at the end of this step
+apply to both formats.
+
+#### 6a. Text report
+
 Write `qa-reports/<timestamp>/report.md`. Structure:
 
 ```markdown
@@ -207,7 +227,64 @@ footer button so it clears the keyboard" rather than a prescribed patch.>
 <Anything deliberately out of scope, and why.>
 ```
 
-Rules for the report:
+#### 6b. HTML report
+
+Do not hand-write HTML. Write the content as `qa-reports/<timestamp>/report.json`
+and let the renderer lay it out — it produces the same page every time and
+escapes everything it prints.
+
+```json
+{
+  "project": "Acme Store",
+  "date": "2026-09-16",
+  "target": "https://staging.acme.test",
+  "verdict": "not-shippable",
+  "summary": "Checkout submit is hidden behind the keyboard on every iPhone in landscape.\n\nMoving it into a sticky footer is the single largest payoff.",
+  "orderRationale": "Ordered by reach: #2 is MEDIUM but hits every device.",
+  "findings": [
+    {
+      "title": "Submit button is covered by the keyboard",
+      "severity": "BLOCKER",
+      "source": "rule",
+      "rule": "submit-below-keyboard",
+      "where": [
+        { "page": "/checkout", "devices": ["iPhone SE landscape", "Galaxy S8+ landscape"] }
+      ],
+      "element": "form.checkout > button.submit",
+      "impact": "The user fills in their email and cannot reach the button without dismissing the keyboard.",
+      "measurements": [{ "label": "Button top vs keyboard top", "value": "212px vs 180px" }],
+      "suggestion": "This would probably sit better as a sticky footer button so it clears the keyboard.",
+      "evidence": ["screenshots/checkout__email-focused__iphone-se-landscape--viewport.png"]
+    }
+  ],
+  "notInvestigated": ["Pages behind the B2B login — no credentials provided."]
+}
+```
+
+- `verdict` is one of `not-shippable`, `shippable-with-fixes`, `shippable`.
+- `source` is `rule` or `visual`. Visual findings still carry `evidence`.
+- `evidence` paths are relative to the report directory, exactly as they appear
+  in `findings.json`. Prefer the `--viewport.png` shot for fixed chrome and
+  above-the-fold issues; put both fold shots in for a fold transition finding.
+- Text fields may use `` `backticks` `` for code and blank lines for paragraphs.
+  Nothing else is interpreted — no Markdown, no HTML.
+
+Render it with the script next to the runner:
+
+```bash
+node "$(dirname "$QA")/render-report.mjs" qa-reports/<timestamp>
+```
+
+Add `--embed` when the report will be sent on its own (email, chat, upload):
+the referenced screenshots are inlined and `report.html` becomes a single
+portable file. Without it, the HTML must stay next to `screenshots/`.
+
+The renderer also reads `findings.json` for the raw rule-hit counts, the run
+matrix and any failed runs — do not copy those into `report.json`. If it warns
+that evidence paths were not found, fix the paths and render again. Then open
+`report.html` (or tell the user where it is) and check that the images load.
+
+#### Rules for both formats
 
 - **Group by defect, not by run.** One heading per problem, listing every device
   it appears on. Twelve runs finding the same 38px button is one finding.
@@ -254,6 +331,8 @@ follow-up on anything ambiguous.
 | Fold check reports stale blocks on a correct site | Layout is genuinely fixed-width at that size by design | Verify against the two screenshots, then drop the finding and say why |
 | Screenshot is a blank white page | Captured before content painted, or a lazy-loaded route | Add a `{ "waitFor": "<selector>" }` step to the page's state |
 | Header appears several times down a screenshot | Full-page capture repaints fixed elements per scroll position | Capture artefact, not a defect. Judge chrome from the `--viewport.png` shot |
+| `render-report` warns evidence paths not found | Path in `report.json` does not match the file on disk | Copy the path from `findings.json` (`screenshot` / `screenshotViewport`), render again |
+| `report.html` shows broken images after sharing | Rendered without `--embed`, then sent without `screenshots/` | Render again with `--embed` |
 | Run takes very long | Full matrix × pages × states × `--perf` | Drop `--perf` for the sweep and rerun it alone on the two pages that matter |
 
 ## Scope

@@ -12,7 +12,7 @@ build step, no dependencies to install for the repo itself.
 
 | Skill | What it does |
 |-------|--------------|
-| [`mobile-ux-qa`](skills/mobile-ux-qa/) | Mobile-first UX audit across a device matrix in both orientations, including the foldable iPhone Duo. Drives Playwright, measures what is measurable, screenshots the rest, and reports what is broken. |
+| [`mobile-ux-qa`](skills/mobile-ux-qa/) | Mobile-first UX audit across a device matrix in both orientations, including the foldable iPhone Duo. Drives Playwright, measures what is measurable, screenshots the rest, and reports what is broken — as Markdown or a shareable HTML report with inline screenshots. |
 
 ---
 
