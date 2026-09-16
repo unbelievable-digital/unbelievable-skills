@@ -28,6 +28,9 @@ Frame findings accordingly.
 - A full accessibility audit — this covers the mobile-relevant subset only. Use a
   dedicated axe-based pass for WCAG conformance.
 - Desktop-only or admin-panel projects.
+- A deep audit of the iPhone Duo alone — all four postures and fold, unfold and
+  rotate transitions — use `iphone-duo-qa`. This skill covers the Duo with one
+  posture and one fold check.
 
 ## Prerequisites
 

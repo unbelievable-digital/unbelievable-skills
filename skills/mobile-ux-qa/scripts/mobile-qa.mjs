@@ -14,12 +14,16 @@
  *   node mobile-qa.mjs --config mobile-qa.config.json
  *
  * See ../SKILL.md for the workflow and ../references/checks.md for the rules.
+ *
+ * The in-page rules and helpers are also exported, so a narrower runner (such as
+ * the iphone-duo-qa skill) can reuse them without copying. Importing this file
+ * does not start an audit; only running it directly does.
  */
 
 import { mkdir, writeFile, readFile } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
+import { existsSync, realpathSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import path from 'node:path'
 
 /**
@@ -104,19 +108,40 @@ const KEYBOARD_HEIGHT = { portrait: 260, landscape: 200 }
 // CLI
 // ---------------------------------------------------------------------------
 
+/** Flags that take a value, so both `--url x` and `--url=x` work. */
+const VALUE_FLAGS = new Set([
+  'config', 'url', 'pages', 'out', 'devices', 'fail-on', 'timeout', 'postures', 'transitions',
+])
+
 function parseArgs(argv) {
   const args = { _: [] }
-  for (const raw of argv.slice(2)) {
+  const list = argv.slice(2)
+  for (let i = 0; i < list.length; i++) {
+    const raw = list[i]
     if (!raw.startsWith('--')) { args._.push(raw); continue }
     const [key, ...rest] = raw.slice(2).split('=')
-    args[key] = rest.length ? rest.join('=') : true
+    if (rest.length) {
+      args[key] = rest.join('=')
+    } else if (VALUE_FLAGS.has(key) && i + 1 < list.length && !list[i + 1].startsWith('--')) {
+      args[key] = list[++i]
+    } else {
+      args[key] = true
+    }
   }
   return args
 }
 
 const args = parseArgs(process.argv)
 
-if (args.help) {
+const isMain = (() => {
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
+  } catch {
+    return false
+  }
+})()
+
+if (isMain && args.help) {
   console.log(`mobile-qa — mobile-first UX audit
 
   --config <path>     Config file (default: mobile-qa.config.json if present)
@@ -138,9 +163,9 @@ if (args.help) {
 // Config
 // ---------------------------------------------------------------------------
 
-async function loadConfig() {
+async function loadConfig(defaults = ['mobile-qa.config.json']) {
   const explicit = typeof args.config === 'string' ? args.config : null
-  const candidate = explicit ?? 'mobile-qa.config.json'
+  const candidate = explicit ?? defaults.find((f) => existsSync(f)) ?? defaults[0]
   let config = {}
 
   if (existsSync(candidate)) {
@@ -705,6 +730,31 @@ function perfFindings(perf) {
 }
 
 // ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
+/** Log in once and return a storageState path to reuse across every context. */
+async function ensureAuth(ENGINES, config, timeout) {
+  if (!config.auth?.login) return undefined
+  const statePath = config.auth.storageState || '.auth/mobile-qa.json'
+  if (existsSync(statePath)) {
+    console.log(`auth: reusing saved session at ${statePath}`)
+    return statePath
+  }
+  console.log('auth: logging in…')
+  const browser = await ENGINES.chromium.launch({ headless: !args.headed })
+  const context = await browser.newContext({ viewport: { width: 393, height: 852 } })
+  const page = await context.newPage()
+  await page.goto(new URL(config.auth.login.path, config.baseUrl).href, { waitUntil: 'load', timeout })
+  await runSteps(page, config.auth.login.steps, timeout)
+  await mkdir(path.dirname(statePath), { recursive: true })
+  await context.storageState({ path: statePath })
+  await browser.close()
+  console.log(`auth: session saved to ${statePath}`)
+  return statePath
+}
+
+// ---------------------------------------------------------------------------
 // Runner
 // ---------------------------------------------------------------------------
 
@@ -724,28 +774,7 @@ async function main() {
   const statesByName = new Map((config.states || []).map((s) => [s.name, s]))
   const runs = []
   const errors = []
-  let storageState
-
-  // Authenticate once and reuse the session across every device.
-  if (config.auth?.login) {
-    const statePath = config.auth.storageState || '.auth/mobile-qa.json'
-    if (existsSync(statePath)) {
-      storageState = statePath
-      console.log(`auth: reusing saved session at ${statePath}`)
-    } else {
-      console.log('auth: logging in…')
-      const browser = await ENGINES.chromium.launch({ headless: !args.headed })
-      const context = await browser.newContext({ viewport: { width: 393, height: 852 } })
-      const page = await context.newPage()
-      await page.goto(new URL(config.auth.login.path, config.baseUrl).href, { waitUntil: 'load', timeout })
-      await runSteps(page, config.auth.login.steps, timeout)
-      await mkdir(path.dirname(statePath), { recursive: true })
-      await context.storageState({ path: statePath })
-      await browser.close()
-      storageState = statePath
-      console.log(`auth: session saved to ${statePath}`)
-    }
-  }
+  const storageState = await ensureAuth(ENGINES, config, timeout)
 
   const byEngine = {}
   for (const id of deviceIds) (byEngine[DEVICES[id].engine] ??= []).push(id)
@@ -988,7 +1017,15 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(`mobile-qa failed: ${err.message || err}`)
-  process.exit(2)
-})
+export {
+  loadPlaywright, loadConfig, ensureAuth, parseArgs,
+  DEVICES, UA_IOS, KEYBOARD_HEIGHT,
+  pageAudit, layoutFingerprint, runSteps, settle,
+}
+
+if (isMain) {
+  main().catch((err) => {
+    console.error(`mobile-qa failed: ${err.message || err}`)
+    process.exit(2)
+  })
+}
