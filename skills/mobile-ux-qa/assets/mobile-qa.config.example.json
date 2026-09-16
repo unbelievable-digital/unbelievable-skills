@@ -1,0 +1,51 @@
+{
+  "baseUrl": "http://localhost:3000",
+
+  "pages": [
+    { "name": "home", "path": "/" },
+    { "name": "product", "path": "/products/example-product", "states": ["menu-open"] },
+    { "name": "cart", "path": "/cart" },
+    { "name": "checkout", "path": "/checkout", "states": ["email-focused"], "auth": true }
+  ],
+
+  "states": [
+    {
+      "name": "menu-open",
+      "steps": [
+        { "click": "[aria-label='Menu']" },
+        { "wait": 400 }
+      ]
+    },
+    {
+      "name": "email-focused",
+      "steps": [
+        { "focus": "input[type='email']" },
+        { "wait": 200 }
+      ]
+    },
+    {
+      "name": "scrolled",
+      "steps": [
+        { "scroll": 1200 }
+      ]
+    }
+  ],
+
+  "auth": {
+    "storageState": ".auth/mobile-qa.json",
+    "login": {
+      "path": "/account/login",
+      "steps": [
+        { "fill": "input[name='email']", "valueFromEnv": "QA_USER" },
+        { "fill": "input[name='password']", "valueFromEnv": "QA_PASS" },
+        { "click": "button[type='submit']" },
+        { "waitForUrl": "**/account**" }
+      ]
+    }
+  },
+
+  "ignore": [
+    "#cookie-banner",
+    ".third-party-widget"
+  ]
+}

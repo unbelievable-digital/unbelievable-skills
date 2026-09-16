@@ -8,4 +8,4 @@ documented in `../CLAUDE.md`.
 
 | Skill | Description |
 |-------|-------------|
-| _none yet_ | |
+| [`mobile-ux-qa`](mobile-ux-qa/) | Mobile-first UX audit across a device matrix in both orientations, including the foldable iPhone Duo. Measures what is measurable, screenshots the rest, reports what is broken. |
