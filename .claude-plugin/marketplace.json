@@ -1,0 +1,23 @@
+{
+  "name": "unbelievable",
+  "owner": {
+    "name": "Unbelievable Digital",
+    "url": "https://github.com/unbelievable-digital"
+  },
+  "metadata": {
+    "description": "Claude Code skills maintained by Unbelievable Digital"
+  },
+  "plugins": [
+    {
+      "name": "unbelievable-skills",
+      "source": "./",
+      "description": "Agency workflow skills for Claude Code. Currently: mobile-first UX QA across a device matrix using Playwright.",
+      "version": "0.1.0",
+      "author": { "name": "Unbelievable Digital" },
+      "license": "MIT",
+      "homepage": "https://github.com/unbelievable-digital/unbelievable-skills",
+      "category": "quality",
+      "tags": ["qa", "mobile", "playwright", "ux", "responsive", "accessibility"]
+    }
+  ]
+}

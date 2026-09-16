@@ -1,0 +1,9 @@
+{
+  "name": "unbelievable-skills",
+  "description": "Agency workflow skills for Claude Code, maintained by Unbelievable Digital",
+  "version": "0.1.0",
+  "author": { "name": "Unbelievable Digital" },
+  "license": "MIT",
+  "homepage": "https://github.com/unbelievable-digital/unbelievable-skills",
+  "keywords": ["qa", "mobile", "playwright", "ux", "responsive", "seo", "agency"]
+}
