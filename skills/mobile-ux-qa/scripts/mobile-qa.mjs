@@ -38,7 +38,9 @@ async function loadPlaywright() {
       const mod = await import(pathToFileURL(attempt()).href)
       // Playwright ships CommonJS, so a dynamic import puts the real exports
       // on `default` rather than on the namespace itself.
-      return mod.chromium ? mod : mod.default
+      const pw = mod.chromium ? mod : mod.default
+      if (!pw?.chromium) continue
+      return { chromium: pw.chromium, webkit: pw.webkit }
     } catch { /* try the next location */ }
   }
   throw new Error(
@@ -47,7 +49,6 @@ async function loadPlaywright() {
   )
 }
 
-const { chromium, webkit } = await loadPlaywright()
 
 // ---------------------------------------------------------------------------
 // Device registry
@@ -707,9 +708,10 @@ function perfFindings(perf) {
 // Runner
 // ---------------------------------------------------------------------------
 
-const ENGINES = { chromium, webkit }
-
 async function main() {
+  // Loaded here rather than at module scope so --help works without Playwright.
+  const ENGINES = await loadPlaywright()
+
   const config = await loadConfig()
   const deviceIds = selectDevices()
   const timeout = Number(args.timeout) || 30000

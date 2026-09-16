@@ -12,7 +12,7 @@
       "name": "unbelievable-skills",
       "source": "./",
       "description": "Agency workflow skills for Claude Code. Currently: mobile-first UX QA across a device matrix using Playwright.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": { "name": "Unbelievable Digital" },
       "license": "MIT",
       "homepage": "https://github.com/unbelievable-digital/unbelievable-skills",

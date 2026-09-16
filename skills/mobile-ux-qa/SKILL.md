@@ -88,8 +88,23 @@ the environment. The config is committed; the environment is not.
 
 ### 4. Run the audit
 
+The runner lives next to this file. Where "next to this file" is depends on how
+the skill was installed, so resolve it once and reuse the variable:
+
 ```bash
-node <skill>/scripts/mobile-qa.mjs --config mobile-qa.config.json
+QA=$(find ~/.claude/plugins/cache ~/.claude/skills "$PWD/.claude/skills" \
+     -name mobile-qa.mjs -path '*mobile-ux-qa*' 2>/dev/null | head -1)
+```
+
+When the skill is loaded as a plugin, `$CLAUDE_PLUGIN_ROOT` points at the plugin
+root and `$CLAUDE_PLUGIN_ROOT/skills/mobile-ux-qa/scripts/mobile-qa.mjs` is the
+runner — prefer that when the variable is set.
+
+Run it from the directory of the project under test, because that is where
+Playwright is resolved from and where the report is written:
+
+```bash
+node "$QA" --config mobile-qa.config.json
 ```
 
 Useful flags:
@@ -230,7 +245,8 @@ follow-up on anything ambiguous.
 
 | Symptom | Cause | What to do |
 |---------|-------|------------|
-| `Executable doesn't exist` | Engine not installed | `npx playwright install chromium webkit` |
+| `Executable doesn't exist` | Engine not installed, or the installed build does not match the Playwright version | `npx playwright install chromium webkit` |
+| `Playwright is not installed in <dir>` | The runner resolves Playwright from the working directory | Run it from the project under test after `npm i -D playwright` |
 | Every run fails on navigation | Dev server not up, or wrong port | `curl -sI <url>` first; check the dev script's real port |
 | Hundreds of contrast findings | Design system uses a low-contrast palette deliberately | Report it once as a systemic finding, not once per element |
 | Zero findings on a real site | Pages behind auth returned a login page | Check `auth` in the config; look at the screenshots to confirm what was captured |
