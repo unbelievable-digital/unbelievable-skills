@@ -13,6 +13,7 @@ build step, no dependencies to install for the repo itself.
 | Skill | What it does |
 |-------|--------------|
 | [`mobile-ux-qa`](skills/mobile-ux-qa/) | Mobile-first UX audit across a device matrix in both orientations, including the foldable iPhone Duo. Drives Playwright, measures what is measurable, screenshots the rest, and reports what is broken — as Markdown or a shareable HTML report with inline screenshots. |
+| [`iphone-duo-qa`](skills/iphone-duo-qa/) | Deep QA on Apple's foldable iPhone Duo only: closed and open, portrait and landscape, plus live fold, unfold and rotate transitions without a reload. Catches cached widths, stale `--vh` heights, broken overlays and drifting fixed buttons. Same report formats as `mobile-ux-qa`, whose rules it reuses. |
 
 ---
 
@@ -65,6 +66,8 @@ ln -s "$PWD"/skills/* ~/.claude/skills/
 # Or just one
 ln -s "$PWD/skills/mobile-ux-qa" ~/.claude/skills/mobile-ux-qa
 ```
+
+`iphone-duo-qa` reuses the `mobile-ux-qa` runner, so link both when you install it.
 
 ### Option 3 — scoped to a single project
 
