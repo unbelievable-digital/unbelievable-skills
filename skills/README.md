@@ -10,3 +10,4 @@ documented in `../CLAUDE.md`.
 |-------|-------------|
 | [`mobile-ux-qa`](mobile-ux-qa/) | Mobile-first UX audit across a device matrix in both orientations, including the foldable iPhone Duo. Measures what is measurable, screenshots the rest, reports what is broken. |
 | [`iphone-duo-qa`](iphone-duo-qa/) | iPhone Duo only: four postures plus fold, unfold and rotate transitions without a reload. Reuses the `mobile-ux-qa` rules and report renderer. |
+| [`client-proposal-generator`](client-proposal-generator/) | Step-by-step client proposal builder with a price range computed from the operator's own stored rates. No real pricing ships in the package. |

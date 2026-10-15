@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="{{LANG_CODE}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{PROPOSAL_TITLE}}</title>
+<style>
+  :root {
+    --ink: #14161a;
+    --muted: #5b6270;
+    --line: #e5e7eb;
+    --accent: #2b6cb0;
+    --bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+  }
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+  }
+  header img { height: 40px; }
+  header .meta { text-align: right; font-size: 13px; color: var(--muted); }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 36px 0 12px; border-left: 4px solid var(--accent); padding-left: 10px; }
+  .subtitle { color: var(--muted); margin: 0 0 28px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .price-box {
+    background: #f6f8fb;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .price-box .range { font-size: 26px; font-weight: 700; color: var(--accent); }
+  .price-box .note { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .pdf-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  @media print {
+    .pdf-btn { display: none; }
+    body { padding: 0; }
+  }
+</style>
+</head>
+<body>
+  <button class="pdf-btn" onclick="window.print()">{{PDF_BUTTON_LABEL}}</button>
+  <div class="page">
+    <header>
+      <img src="logo.png" alt="logo">
+      <div class="meta">
+        {{PROPOSAL_DATE}}<br>
+        {{VALID_UNTIL_LABEL}}
+      </div>
+    </header>
+
+    <h1>{{PROPOSAL_TITLE}}</h1>
+    <p class="subtitle">{{CLIENT_NAME}}</p>
+
+    <h2>{{SECTION_UNDERSTANDING}}</h2>
+    <p>{{PROJECT_SUMMARY}}</p>
+
+    <h2>{{SECTION_SCOPE}}</h2>
+    <table>
+      <!-- one row per deliverable, filled in per proposal -->
+      {{SCOPE_ROWS}}
+    </table>
+
+    <h2>{{SECTION_TIMELINE}}</h2>
+    <p>{{TIMELINE_TEXT}}</p>
+
+    <h2>{{SECTION_INVESTMENT}}</h2>
+    <div class="price-box">
+      <div class="range">{{PRICE_RANGE}}</div>
+      <div class="note">{{PRICE_NOTE}}</div>
+    </div>
+
+    <h2>{{SECTION_NEXT_STEPS}}</h2>
+    <p>{{NEXT_STEPS_TEXT}}</p>
+
+    <footer>
+      Unbelievable Digital · {{CONTACT_LINE}}
+    </footer>
+  </div>
+</body>
+</html>

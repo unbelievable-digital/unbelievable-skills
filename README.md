@@ -14,10 +14,20 @@ build step, no dependencies to install for the repo itself.
 |-------|--------------|
 | [`mobile-ux-qa`](skills/mobile-ux-qa/) | Mobile-first UX audit across a device matrix in both orientations, including the foldable iPhone Duo. Drives Playwright, measures what is measurable, screenshots the rest, and reports what is broken — as Markdown or a shareable HTML report with inline screenshots. |
 | [`iphone-duo-qa`](skills/iphone-duo-qa/) | Deep QA on Apple's foldable iPhone Duo only: closed and open, portrait and landscape, plus live fold, unfold and rotate transitions without a reload. Catches cached widths, stale `--vh` heights, broken overlays and drifting fixed buttons. Same report formats as `mobile-ux-qa`, whose rules it reuses. |
+| [`client-proposal-generator`](skills/client-proposal-generator/) | Walks through a client proposal step by step — output format, language, scope — and estimates a price range from the operator's own stored hourly rates (set up on first run; never committed to this repo). Produces a Word, PDF, or HTML proposal with the agency's branding. |
 
 ---
 
 ## Install
+
+### Quick install (one command)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/unbelievable-digital/unbelievable-skills/main/install.sh | bash
+```
+
+Runs the two commands from Option 1 below for you. Requires the `claude` CLI
+to already be installed.
 
 ### Option 1 — as a plugin (recommended)
 
